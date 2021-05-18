@@ -1,0 +1,35 @@
+.app_header .webix_el_label {
+	font-size: 20px;
+}
+.app_header.webix_header .webix_secondary button {
+ 	border-color: transparent;
+}
+
+.app_menu .webix_tree_item.webix_selected {
+    background-color: #27ae60;
+}
+
+.popup_info_product {
+	display: flex;
+}
+.photo {
+	width: 300px;
+	height: 300px;
+}
+.photo img,
+img {
+	width: 100%;
+	height: 100%;
+	object-fit: contain;
+}
+
+.cell_counter .webix_cell,
+.cell_cart .webix_cell {
+	display: flex;
+	align-items: center;
+    justify-content: center;
+}
+
+.cell_cart .cart {
+	font-size: 30px;
+}
