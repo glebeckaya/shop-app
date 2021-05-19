@@ -5,7 +5,7 @@ import users from "../models/users";
 
 export default class TopView extends JetView {
 	config() {
-		let header = {
+		const header = {
 			type: "toolbar",
 			height: 55,
 			localId: "header",
@@ -14,7 +14,12 @@ export default class TopView extends JetView {
 				{view: "label", template: "Varin shop"},
 				{view: "label", localId: "headerUser", value: "Hi, varyas!", template: "#value#"},
 				{view: "button", value: "Logout", width: 100},
-				{view: "button", value: "History", width: 100},
+				{
+					view: "button",
+					value: "History",
+					width: 100,
+					click: () => this.show("./history")
+				},
 				{
 					view: "button",
 					localId: "bagUser",
@@ -26,7 +31,7 @@ export default class TopView extends JetView {
 			css: "webix_header app_header"
 		};
 
-		let menu = {
+		const menu = {
 			view: "tree",
 			localId: "menu",
 			select: true,
@@ -48,7 +53,7 @@ export default class TopView extends JetView {
 			}
 		};
 
-		let ui = {
+		return {
 			paddingX: 5,
 			rows: [
 				header,
@@ -63,8 +68,6 @@ export default class TopView extends JetView {
 				}
 			]
 		};
-
-		return ui;
 	}
 
 	init() {
@@ -88,14 +91,10 @@ export default class TopView extends JetView {
 		users.waitData.then(() => {
 			this.user = users.getItem(users.getFirstId());
 			this.setParam("id", this.user._id, true);
-			const bagSize = this.getBagLength(this.user.bag);
-			this.setValues(this.headerUser, `Hi, ${this.user.name}!`);
-			this.setValues(this.bagUser, `Bag(${bagSize})`);
+			this.setLabelValues(this.headerUser, `Hi, ${this.user.name}!`);
+			this.setLabelValues(this.bagUser, this.getBagValue());
 		});
-		this.on(this.app, "onBagChange", () => {
-			const bagSize = this.getBagLength(this.user.bag);
-			this.setValues(this.bagUser, `Bag(${bagSize})`);
-		});
+		this.on(this.app, "onBagChange", () => this.setLabelValues(this.bagUser, this.getBagValue()));
 	}
 
 	urlChange() {
@@ -105,12 +104,14 @@ export default class TopView extends JetView {
 		});
 	}
 
-	setValues(container, value) {
+	setLabelValues(container, value) {
 		container.setValue(value);
 		container.refresh();
 	}
 
-	getBagLength(bag) {
-		return (bag && bag.length) ? JSON.parse(bag).length : 0;
+	getBagValue() {
+		const bag = this.user.bag;
+		const bagSize = (bag && bag.length) ? JSON.parse(bag).length : 0;
+		return bagSize !== 0 ? `Bag(${bagSize})` : "Bag";
 	}
 }

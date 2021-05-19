@@ -61,6 +61,22 @@ export default class HistoryView extends JetView {
 
 	init() {
 		this.historyTable = this.$$("historyTable");
-		this.historyTable.sync(orders);
+		this.userId = this.getParam("id", true);
+
+		this.historyTable.filterByAll = () => {
+			const name = this.historyTable.getFilter("productId").value;
+			if (!name) return this.historyTable.filter();
+			this.historyTable.filter((obj) => {
+				const product = catalog.find(item => item._id === obj.productId)[0];
+				return product.name.toLowerCase().indexOf(name) !== -1;
+			});
+		};
+	}
+
+	urlChange() {
+		orders.waitData.then(() => {
+			orders.filter(obj => obj.user === this.userId);
+			this.historyTable.sync(orders);
+		});
 	}
 }

@@ -79,6 +79,7 @@ export default class ContactsView extends JetView {
 		this.popupInfo = this.ui(PopupView);
 		users.waitData.then(() => {
 			this.user = users.getItem(users.getFirstId());
+			
 		});
 		this.shopTable.sync(catalog);
 	}

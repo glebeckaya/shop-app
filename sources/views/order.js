@@ -86,31 +86,7 @@ export default class OrderFormView extends JetView {
 				{
 					view: "button",
 					value: "Checkout",
-					click: () => {
-						this.form.validate();
-						if (!this.form.validate()) return;
-						const formValues = this.form.getValues();
-						this.userBag.forEach((order) => {
-							const newOrder = {
-								user: this.user._id,
-								productId: order.productId,
-								amount: order.quantity,
-								address: formValues.deliveryAddress,
-								delivery: formValues.delivery,
-								payment: formValues.payment,
-								date: webix.Date.dateToStr("%Y-%m-%d %h:%i")(new Date()),
-								status: "In process",
-								customerName: formValues.name,
-								customerEmail: formValues.email,
-								customerPhone: formValues.phone
-							};
-							orders.add(newOrder);
-							this.user.bag = "";
-							users.updateItem(this.user.id, this.user);
-							this.app.callEvent("onBagChange");
-						});
-						this.show("../history");
-					}
+					click: () => this.makeOrder()
 				}
 			]
 		};
@@ -131,43 +107,44 @@ export default class OrderFormView extends JetView {
 		});
 	}
 
-	// setLabels(label) {
-	// 	const headerForm = this._(`${label}Contact`);
-	// 	this.$$("headerForm").setValues({headerForm});
-	// 	this.$$("buttonSave").setValue(this._(label));
-	// }
+	makeOrder() {
+		this.form.validate();
+		if (!this.form.validate()) return;
+		const formValues = this.form.getValues();
 
-	// saveContact() {
-	// 	if (!this.form.validate()) {
-	// 		webix.message(this._("checkFields"));
-	// 		return false;
-	// 	}
-	// 	const values = this.form.getValues();
-	// 	values.Birthday = webix.Date.dateToStr("%Y-%m-%d %h:%i")(values.Birthday);
-	// 	values.Photo = this.photoTemplate.getValues().Photo;
+		this.userBag.forEach((order) => {
+			const newOrder = {
+				user: this.user._id,
+				productId: order.productId,
+				amount: order.quantity,
+				address: formValues.deliveryAddress,
+				delivery: formValues.delivery,
+				payment: formValues.payment,
+				date: webix.Date.dateToStr("%Y-%m-%d %h:%i")(new Date()),
+				status: "In process",
+				customerName: formValues.name,
+				customerEmail: formValues.email,
+				customerPhone: formValues.phone
+			};
+			orders.add(newOrder);
+		});
 
-	// 	contacts.waitSave(() => {
-	// 		if (values.id) {
-	// 			contacts.updateItem(values.id, values);
-	// 		}
-	// 		else contacts.add(values);
-	// 	}).then((res) => {
-	// 		this.cancelContactForm(res.id);
-	// 	});
-	// 	return values;
-	// }
+		this.clearBag();
+		this.throwCounters();
+		this.show("../history");
+	}
 
-	// showConfirmToCancel() {
-	// 	webix.confirm({
-	// 		ok: "OK",
-	// 		cancel: this._("Cancel"),
-	// 		text: this._("CancelFormContact")
-	// 	}).then(
-	// 		() => this.cancelContactForm()
-	// 	);
-	// }
+	throwCounters() {
+		catalog.data.order.forEach((id) => {
+			const product = catalog.getItem(id);
+			product.count = 0;
+			catalog.updateItem(product.id, product);
+		});
+	}
 
-	// cancelContactForm(id) {
-	// 	this.app.callEvent("onCancelForm", [id]);
-	// }
+	clearBag() {
+		this.user.bag = "";
+		users.updateItem(this.user.id, this.user);
+		this.app.callEvent("onBagChange");
+	}
 }

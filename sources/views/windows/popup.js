@@ -1,7 +1,6 @@
 import {JetView} from "webix-jet";
 
 import catalog from "../../models/catalog";
-import users from "../../models/users";
 
 export default class PopupView extends JetView {
 	config() {
@@ -31,49 +30,41 @@ export default class PopupView extends JetView {
 						<p><span class="">Price:</span> ${obj.price || ""}$</p>
 						<p>
 							<span class="rating">Rating:</span> ${obj.rating || ""} 
-							<span class='webix_icon icon_rating_star mdi mdi-${this.productStar ? "star" : "star-outline"}'></span>
+							<span class='webix_icon icon_rating_star mdi mdi-${obj.stared ? "star" : "star-outline"}'></span>
 						</p>
 					</div>	
 				</div>`,
 				onClick: {
-					icon_rating_star: () => {
-						const stars = this.getStarsArray(this.user.stars);
-						const indexProd = stars.findIndex(el => el.productId === this.product._id);
-						if (indexProd === -1) {
-							const starProduct = {
-								productId: this.product._id,
-								stared: true
-							};
-							stars.push(starProduct);
-						}
-						if (indexProd >= 0) stars[indexProd].stared = !stars[indexProd].stared;
-						this.user.stars = JSON.stringify(stars);
-						users.updateItem(this.user.id, this.user);
-					}
+					icon_rating_star: () => this.changeRating()
 				}
 			}
 		};
 	}
 
 	init() {
-		users.waitData.then(() => {
-			this.user = users.getItem(users.getFirstId());
-		});
+		this.template = this.$$("contactsTemplate");
 	}
 
 	showWindow(rowItem) {
-		this.product = catalog.getItem(rowItem.row);
-		const headerWindow = `${this.product.name}`;
-		this.$$("headerWindow").setValues({headerWindow});
-		this.$$("contactsTemplate").parse(this.product);
-		this.getRoot().show();
+		catalog.waitData.then(() => {
+			this.product = catalog.getItem(rowItem.row);
+			const headerWindow = `${this.product.name}`;
+			this.$$("headerWindow").setValues({headerWindow});
+			this.template.parse(this.product);
+			this.getRoot().show();
+		});
 	}
 
 	hideWindow() {
 		this.getRoot().hide();
+		catalog.updateItem(this.product.id, this.product);
 	}
 
-	getStarsArray(arr) {
-		return (arr && arr.length) ? JSON.parse(arr) : [];
+	changeRating() {
+		const currentRating = this.product.rating;
+		const currentStared = this.product.stared;
+		this.product.rating = (!currentStared) ? currentRating + 1 : currentRating - 1;
+		this.product.stared = !currentStared;
+		this.template.parse(this.product);
 	}
 }

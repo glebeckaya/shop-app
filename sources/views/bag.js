@@ -99,15 +99,15 @@ export default class ContactsView extends JetView {
 		return product[0];
 	}
 
-	deleteProductFromBag(row) {
+	deleteProductFromBag(product) {
 		webix.confirm({
 			ok: "OK",
 			cancel: "Cancel",
 			text: "Do you really want to delete this product from your bag"
 		}).then(() => {
-			const index = this.userBag.findIndex(el => el.id === row.id);
+			const index = this.userBag.findIndex(el => el.id === product.row);
 			this.userBag.splice(index, 1);
-			this.bagTable.remove(row);
+			this.bagTable.remove(product);
 			this.user.bag = JSON.stringify(this.userBag);
 			users.updateItem(this.user.id, this.user);
 			this.app.callEvent("onBagChange");
