@@ -20,7 +20,7 @@ export default class TopView extends JetView {
 					localId: "bagUser",
 					value: "Bag",
 					width: 120,
-					click: () => this.show(`./bag?id=${this.user._id}`)
+					click: () => this.show("./bag")
 				}
 			],
 			css: "webix_header app_header"
@@ -87,6 +87,7 @@ export default class TopView extends JetView {
 		});
 		users.waitData.then(() => {
 			this.user = users.getItem(users.getFirstId());
+			this.setParam("id", this.user._id, true);
 			const bagSize = this.getBagLength(this.user.bag);
 			this.setValues(this.headerUser, `Hi, ${this.user.name}!`);
 			this.setValues(this.bagUser, `Bag(${bagSize})`);

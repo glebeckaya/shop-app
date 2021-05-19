@@ -54,18 +54,7 @@ export default class ContactsView extends JetView {
 			],
 			onClick: {
 				"wxi-trash": (e, row) => {
-					webix.confirm({
-						ok: "OK",
-						cancel: "Cancel",
-						text: "Do you really want to delete this product from your bag"
-					}).then(() => {
-						const index = this.userBag.findIndex(el => el.id === row.id);
-						this.userBag.splice(index, 1);
-						this.bagTable.remove(row);
-						this.user.bag = JSON.stringify(this.userBag);
-						users.updateItem(this.user.id, this.user);
-						this.app.callEvent("onBagChange");
-					});
+					this.deleteProductFromBag(row);
 					return false;
 				}
 			}
@@ -79,7 +68,8 @@ export default class ContactsView extends JetView {
 						{
 							view: "button",
 							value: "Make order",
-							width: 300
+							width: 300,
+							click: () => this.show("../order")
 						},
 						{}
 					]
@@ -107,5 +97,20 @@ export default class ContactsView extends JetView {
 	getProduct(_id) {
 		const product = catalog.find(item => item._id === _id);
 		return product[0];
+	}
+
+	deleteProductFromBag(row) {
+		webix.confirm({
+			ok: "OK",
+			cancel: "Cancel",
+			text: "Do you really want to delete this product from your bag"
+		}).then(() => {
+			const index = this.userBag.findIndex(el => el.id === row.id);
+			this.userBag.splice(index, 1);
+			this.bagTable.remove(row);
+			this.user.bag = JSON.stringify(this.userBag);
+			users.updateItem(this.user.id, this.user);
+			this.app.callEvent("onBagChange");
+		});
 	}
 }

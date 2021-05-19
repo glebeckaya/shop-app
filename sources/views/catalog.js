@@ -59,41 +59,9 @@ export default class ContactsView extends JetView {
 				}
 			],
 			onClick: {
-				webix_inp_counter_prev: (e, id) => {
-					const item = catalog.getItem(id.row);
-					let count = item.count ?? 0;
-					item.count = (count > 0) ? (count -= 1) : 0;
-					catalog.updateItem(item.id, item)
-				},
-				webix_inp_counter_next: (e, id) => {
-					const item = catalog.getItem(id.row);
-					let count = item.count ?? 0;
-					item.count = count += 1;
-					catalog.updateItem(item.id, item)
-				},
-				cart: (e, id) => {
-					const item = catalog.getItem(id.row);
-					if (item.count > 0) {
-						const bag = (this.user.bag && this.user.bag.length) ? JSON.parse(this.user.bag) : [];
-						const indexProd = bag.findIndex(el => el.productId === item._id);
-						if (indexProd === -1) {
-							const addedProduct = {
-								id: this.generateRandomID(),
-								productId: item._id,
-								quantity: item.count
-							};
-							bag.push(addedProduct);
-						}
-						if (indexProd >= 0) bag[indexProd].quantity = item.count;
-						this.user.bag = JSON.stringify(bag);
-						users.updateItem(this.user.id, this.user);
-						this.app.callEvent("onBagChange");
-						this.webix.message(`${item.name} has been added to your bag`);
-					};
-					if (!item.count || item.count === 0) {
-						this.webix.message(`Please, select the quantity of ${item.name} to add in your bag`)
-					}
-				}
+				webix_inp_counter_prev: (e, id) => this.changeCount(id, "prev"),
+				webix_inp_counter_next: (e, id) => this.changeCount(id, "next"),
+				cart: (e, id) => this.addToBag(id)
 			},
 			on: {
 				onItemDblClick: (id) => this.popupInfo.showWindow(id)
@@ -127,10 +95,46 @@ export default class ContactsView extends JetView {
 		});
 	}
 
+	changeCount(id, direction) {
+		const item = catalog.getItem(id.row);
+		let count = item.count ?? 0;
+		if (direction === "prev") {
+			item.count = (count > 0) ? (count -= 1) : 0;
+		}
+		if (direction === "next") {
+			item.count = count += 1;
+		}
+		catalog.updateItem(item.id, item)
+	}
+
+	addToBag(id) {
+		const item = catalog.getItem(id.row);
+		if (!item.count || item.count === 0) {
+			this.webix.message(`Please, select the quantity of ${item.name} to add in your bag`);
+			return
+		}
+		const bag = (this.user.bag && this.user.bag.length) ? JSON.parse(this.user.bag) : [];
+		const indexProd = bag.findIndex(el => el.productId === item._id);
+		if (indexProd === -1) {
+			const addedProduct = {
+				id: this.generateRandomID(),
+				productId: item._id,
+				quantity: item.count
+			};
+			bag.push(addedProduct);
+		}
+		if (indexProd >= 0) bag[indexProd].quantity = item.count;
+		this.user.bag = JSON.stringify(bag);
+		users.updateItem(this.user.id, this.user);
+		this.app.callEvent("onBagChange");
+		this.webix.message(`${item.name} has been added to your bag`);
+	}
+
 	generateRandomID() {
-		return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-		  var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
-		  return v.toString(16);
+		return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+		  	let r = Math.random() * 16 | 0; 
+		  	let v = (c === "x") ? r : (r & 0x3 | 0x8);
+		  	return v.toString(16);
 		});
 	}
 }
