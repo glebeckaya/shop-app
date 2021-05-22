@@ -33,3 +33,19 @@ img {
 .cell_cart .cart {
 	font-size: 30px;
 }
+
+.login_buttons.webix_view {
+	padding-left: 120px;
+	box-sizing: border-box;
+}
+.login_buttons .webix_view {
+	border-color: transparent;
+}
+.login_buttons.webix_view .webix_template {
+	display: flex;
+	align-items: center;
+}
+
+.register_buttons {
+	padding-left: 150px;
+}
